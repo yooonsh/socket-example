@@ -2,7 +2,7 @@
   <div>
     <h1>socket 테스트</h1>
     <ul>
-      <li v-for="msg in msgs" :key="msg">{{ msg }}</li>
+      <li v-for="(msg, index) in msgs" :key="index">{{ msg }}</li>
     </ul>
     <form action="">
       <input
