@@ -4,11 +4,11 @@
     <ul>
       <li v-for="(msg, index) in msgs" :key="index">{{ msg }}</li>
     </ul>
-    <form action="">
+    <form @submit.prevent>
       <input
         v-model="inputMsg"
-        v-on:keydown.enter.prevent="getMessage"
         type="text"
+        @keydown.enter="getMessage"
       /><button type="button" @click="getMessage">Send</button>
     </form>
   </div>
