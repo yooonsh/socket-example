@@ -1,4 +1,4 @@
-# socket-example
+# nuxt-socket-io
 
 ## Build Setup
 
