@@ -13,6 +13,8 @@
     </form>
 
     <div class="voteArea">
+      <button @click="userReady" v-if="ready">ready</button>
+      <button @click="userCancle" v-if="!ready">ready cancle</button>
       <div v-for="(food, i) in foods" :key="i">
         <img :src="food.imageURL" alt="">
         <p>{{food.name}}</p>
@@ -21,6 +23,13 @@
     </div>
     <button @click="voteClear">투표수 초기화</button>
     </div>
+
+    
+    <div class="custom-file">
+    <input id="customFile" type="file" @change="handleFileChange"/>
+    <label class="custom-file-label" for="customFile">{{file_name}}</label>
+  </div>
+  <img v-if="img_src" :src="img_src" width="128" height="128">
 
     <p>{{ minutes }}</p>
     <p>{{ seconds }}</p>
@@ -31,6 +40,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
@@ -38,6 +49,12 @@ export default {
       msgs: [],
       msg: [],
       count: [0,0],
+      ready: true,
+
+      file_name: "파일을 선택하세요.",
+      message: "Hello, world", 
+      file: "", 
+      img_src: "",
 
       title: 'Timer',
       timer: null,
@@ -55,14 +72,15 @@ export default {
     
     this.socket = this.$nuxtSocket({
       name: 'main',
+      
+      emitTimeout:1000
     })
     
     this.voteCount(0)
-
   },
 
   mounted() {
-
+    
     this.socket.on('chat-message', (msg) => {
       this.msgs.push(msg)
     })
@@ -73,8 +91,22 @@ export default {
     this.socket.on('vote2', (count2) => {
       this.$set(this.count, 1, count2)
     })
+
+    this.socket.on('ready', (user) => {
+      console.log(user)
+    })
+    
   },
   methods: {
+    handleFileChange(e) {
+      this.file = e.target.files[0];
+      console.log(this.file)
+      axios.post('https://ojmm.herokuapp.com/api/image/upload', this.file).then((res)=>{
+        console.log(res)
+      })
+      
+    },
+
     getMessage() {
       this.socket.emit('chat-message', this.inputMsg)
       this.inputMsg = ''
@@ -84,13 +116,21 @@ export default {
         this.socket.emit(`vote1`, 0)
         this.socket.emit(`vote2`, 0)
       }else{
-        this.socket.emit(`vote${cnt}`, cnt)
+        this.socket.emit(`vote${cnt}`, 1)
       }
     },
     voteClear() {
       this.socket.emit('voteClear', 'CLEAR')
-      this.count = 0
-      this.count2 = 0
+      this.count = [0,0]
+    },
+
+    userReady(){
+      this.socket.emit('ready')
+      this.ready = !this.ready
+    },
+    userCancle(){
+      this.socket.emit('readyCancle')
+      this.ready = !this.ready
     },
 
     startTimer() {
