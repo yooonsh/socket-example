@@ -101,7 +101,9 @@ export default {
     handleFileChange(e) {
       this.file = e.target.files[0];
       console.log(this.file)
-      axios.post('https://ojmm.herokuapp.com/api/image/upload', this.file).then((res)=>{
+      const form = new FormData()
+      form.append('file',this.file)
+      axios.post('https://ojmm.herokuapp.com/api/image/upload', form).then((res)=>{
         console.log(res)
       })
       
