@@ -13,29 +13,25 @@
     </form>
 
     <div class="voteArea">
-      <button @click="userReady" v-if="ready">ready</button>
-      <button @click="userCancle" v-if="!ready">ready cancle</button>
-      <div v-for="(food, i) in foods" :key="i">
-        <img :src="food.imageURL" alt="">
-        <p>{{food.name}}</p>
-        <p>{{i+1}}번: {{ count[i] }}</p>
-        <button @click="voteCount(i+1)">{{i+1}}번 투표하기</button>
-    </div>
-    <button @click="voteClear">투표수 초기화</button>
+      <button @click="userReady" v-if="ready" class="readyBtn">ready</button>
+      <button @click="userCancle" v-if="!ready" class="readyBtn">ready cancle</button>
+      <div class="count">
+        <p class="time">{{ minutes }} : {{ seconds }}</p>
+        <button @click="startTimer">start</button>
+        <button v-if="timer" @click="stopTimer"> stop</button>
+        <button v-if="resetButton" @click="resetTimer"> reset</button>
+      </div>
+      <div class="menuChoice">
+        <div v-for="(food, i) in 2" :key="i">
+          <img :src="foods[i].imageUrl" alt="">
+          <p>{{foods[i].name}}</p>
+          <p>{{i+1}}번: {{ count[i] }}</p>
+          <button @click="voteCount(i+1)">{{i+1}}번 투표하기</button>
+        </div>
+      </div>
+    <!-- <button @click="voteClear">투표수 초기화</button> -->
     </div>
 
-    
-    <div class="custom-file">
-    <input id="customFile" type="file" @change="handleFileChange"/>
-    <label class="custom-file-label" for="customFile">{{file_name}}</label>
-  </div>
-  <img v-if="img_src" :src="img_src" width="128" height="128">
-
-    <p>{{ minutes }}</p>
-    <p>{{ seconds }}</p>
-    <button @click="startTimer">start</button>
-    <button v-if="timer" @click="stopTimer"> stop</button>
-    <button v-if="resetButton" @click="resetTimer"> reset</button>
   </div>
 </template>
 
@@ -43,6 +39,8 @@
 import axios from 'axios'
 
 export default {
+  components: {  },
+  name: 'SocketTest',
   data() {
     return {
       inputMsg: '',
@@ -51,21 +49,11 @@ export default {
       count: [0,0],
       ready: true,
 
-      file_name: "파일을 선택하세요.",
-      message: "Hello, world", 
-      file: "", 
-      img_src: "",
-
       title: 'Timer',
       timer: null,
       totalTime: (1 * 10),
       resetButton: false,
-      foods:[
-        {imageURL: "https://firebasestorage.googleapis.com/v0/b/nuxt-f0852.appspot.com/o/image%2F0144fba7fce1d31ad96cca27b27bea46f088585cb7df8d182fb55b723ff44d51.jpg?alt=media&token=ea258619-119a-4785-a3d4-321fc9a8ca40",
-        name: "국수"},
-        {imageURL: "https://firebasestorage.googleapis.com/v0/b/nuxt-f0852.appspot.com/o/image%2F0144fba7fce1d31ad96cca27b27bea46f088585cb7df8d182fb55b723ff44d51.jpg?alt=media&token=ea258619-119a-4785-a3d4-321fc9a8ca40",
-        name: "냉면"}
-      ],
+      foods:[],
     }
   },
   created() {
@@ -77,6 +65,12 @@ export default {
     })
     
     this.voteCount(0)
+
+    axios.get('https://ojmm.herokuapp.com/food').then((res)=>{
+      console.log("푸드 랜덤", res.data)
+      this.foods = res.data
+    })
+
   },
 
   mounted() {
@@ -98,16 +92,6 @@ export default {
     
   },
   methods: {
-    handleFileChange(e) {
-      this.file = e.target.files[0];
-      console.log(this.file)
-      const form = new FormData()
-      form.append('file',this.file)
-      axios.post('https://ojmm.herokuapp.com/api/image/upload', form).then((res)=>{
-        console.log(res)
-      })
-      
-    },
 
     getMessage() {
       this.socket.emit('chat-message', this.inputMsg)
@@ -184,12 +168,36 @@ export default {
 </script>
 
 <style>
-.voteArea {
-  display: flex;
-  margin: 0 0 20px 0;
+.voteArea {  
+  display: table;
+  width: 1000px;
+  margin: 0 auto 20px;
   text-align: center;
 }
-.voteArea div {
+.readyBtn{
+  width: 500px;
+  height: 50px;
+  font-size: 20px;
+  border: 1px solid #000;
+  background-color: #eee;
+
+}
+.voteArea .menuChoice {
+  display: flex;
+  margin: 50px 0;
+  padding: 20px;
+  border: 1px solid #000;
+}
+.voteArea .menuChoice div{
+  width: 50%;
   margin: 0 10px;
+}
+.voteArea .menuChoice img{
+  width: 100%;
+}
+
+.count{}
+.count .time{
+  font-size: 40px;
 }
 </style>
