@@ -41,6 +41,13 @@ import axios from 'axios'
 export default {
   components: {  },
   name: 'SocketTest',
+  asyncData() {
+      return axios.get('https://ojmm.herokuapp.com/food').then((res) => {
+        console.log("푸드 랜덤", res.data)
+        // this.foods = res.data
+        return { foods: res.data };
+      });
+  },
   data() {
     return {
       inputMsg: '',
@@ -53,10 +60,13 @@ export default {
       timer: null,
       totalTime: (1 * 10),
       resetButton: false,
-      foods:[],
     }
   },
   created() {
+  //   axios.get('https://ojmm.herokuapp.com/food').then((res)=>{
+  //     console.log("푸드 랜덤", res.data)
+  //     this.foods = res.data
+  //  })
     
     this.socket = this.$nuxtSocket({
       name: 'main',
@@ -66,10 +76,7 @@ export default {
     
     this.voteCount(0)
 
-    axios.get('https://ojmm.herokuapp.com/food').then((res)=>{
-      console.log("푸드 랜덤", res.data)
-      this.foods = res.data
-    })
+
 
   },
 
